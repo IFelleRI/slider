@@ -44,6 +44,7 @@ class Slider{
             this.breakPoints = this.settings.breakPoints;
             this.setBreakPoints();
         }
+
     }
     setBreakPoints(){
         let thisObject = this;
@@ -191,6 +192,98 @@ class Slider{
             }
         }
     }
+
+    // Swipe slides start //
+    setSwipeSlides() {
+        let width = this.getSliderPosition();
+        let loopPosition = this.getSliderPosition();
+        let currentPosition = 0;
+        let indexSlide = 0;
+        const thisObject = this;
+
+        let pressed = false;
+        let x = 0;
+        let y = 0;
+
+        this.sliderContainer.onmousedown = function(e){
+            pressed = true;
+            x = e.clientX;
+            y = e.clientY;
+            this.style.cursor = 'grabbing';
+        }
+        window.onmouseleave = function(e){
+            pressed = false;
+        }
+        this.sliderContainer.onmouseup = function(e){
+            pressed = false;
+            this.style.cursor = 'grab';
+        }
+
+        this.sliderContainer.onmousemove = function(e) { swipeSlides(e); };
+        
+        function swipeSlides(e){
+            if (!pressed) {
+                return;
+            }
+            if (!x || !y) {
+                return false;
+            }
+            if(pressed){
+                let x1 = e.clientX;
+                let y1 = e.clientY;
+
+                // let xMove = e.clientX;
+                // let yMove = e.clientY;
+                let xMove = x1 - x;
+                let yMove = y1 - y;
+
+                if (Math.abs(xMove) > Math.abs(yMove)) {
+                    if (xMove > 0) {
+                        if(indexSlide === -1){
+                            currentPosition -= +width;
+                            thisObject.sliderContainer.style.transitionDuration = '0s';
+                            thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition*(thisObject.sliderItems.length-2)+'px, 0px, 0px)';
+                            setTimeout(function (){
+                                thisObject.sliderContainer.style.transitionDuration = '0.4s';
+                                thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition*(thisObject.sliderItems.length-3)+'px, 0px, 0px)';
+                            },50)
+                            indexSlide = thisObject.sliderItems.length-3;
+                            currentPosition = loopPosition*(thisObject.sliderItems.length-3);
+                        }else {
+                            indexSlide--;
+                            currentPosition -= +width;
+                            thisObject.sliderContainer.style.transitionDuration = '0.4s';
+                            thisObject.sliderContainer.style.transform = 'translate3d(-' + currentPosition + 'px, 0px, 0px)';
+                        }
+                        pressed = false;
+                    } else {
+                        if(indexSlide === thisObject.sliderItems.length - 2){
+                            currentPosition += +width;
+                            thisObject.sliderContainer.style.transitionDuration = '0s';
+                            thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition+'px, 0px, 0px)';
+                            setTimeout(function (){
+                                thisObject.sliderContainer.style.transitionDuration = '0.4s';
+                                thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition*2+'px, 0px, 0px)';
+                            },50)
+                            indexSlide = 1;
+                            currentPosition = loopPosition*2;
+                        }else{
+                            indexSlide++;
+                            currentPosition += +width;
+                            thisObject.sliderContainer.style.transitionDuration = '0.4s';
+                            thisObject.sliderContainer.style.transform = 'translate3d(-'+ currentPosition +'px, 0px, 0px)';
+                            thisObject.setActiveSlide(indexSlide)
+                        }
+                        pressed = false; 
+                    }
+                } else {
+                    // координаты для Y //   
+                }
+            }
+        };
+    }
+    // Swipe slides end //  
+
     SliderInit(){
         this.sliderContainer.classList.add('slider-init');
         this.setSettingsValue();
@@ -200,6 +293,7 @@ class Slider{
         }
         this.sliderItemsInit();
         this.setActiveSlide();
+        this.setSwipeSlides();
         this.sliderNavigation();
     }
 }

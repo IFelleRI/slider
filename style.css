@@ -62,4 +62,5 @@ body{
     transition-property: transform;
     box-sizing: content-box;
     transform: translate3d(0px, 0px, 0px);
+    cursor: grab; 
 }
