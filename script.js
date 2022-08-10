@@ -142,54 +142,55 @@ class Slider{
             currentSlide.previousElementSibling.classList.add('prev-slide');
         }
     }
-    sliderNavigation(){
-        let width = this.getSliderPosition();
-        let loopPosition = this.getSliderPosition();
-        let currentPosition = 0;
-        let indexSlide = 0;
+    setCurrentPosition(){
+        let currentPosition = (this.loop) ? this.getSliderPosition() : 0;
+        this.sliderContainer.style.transform = 'translate3d(-'+currentPosition+'px, 0px, 0px)';
+        return currentPosition;
+    }
+    setNextPosition(currentPosition,indexSlide){
         const thisObject = this;
-        if(this.loop){
-            currentPosition = this.getSliderPosition();
-            loopPosition  = this.getSliderPosition();
-            this.sliderContainer.style.transform = 'translate3d(-'+ loopPosition  +'px, 0px, 0px)';
-        }
-        this.next.onclick = function () {
-            if(indexSlide === thisObject.sliderItems.length - 2){
-                currentPosition += +width;
-                thisObject.sliderContainer.style.transitionDuration = '0s';
-                thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition+'px, 0px, 0px)';
-                setTimeout(function (){
-                    thisObject.sliderContainer.style.transitionDuration = '0.4s';
-                    thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition*2+'px, 0px, 0px)';
-                },50)
-                indexSlide = 1;
-                currentPosition = loopPosition*2;
-            }else{
-                indexSlide++;
-                currentPosition += +width;
+        let loopPosition = this.setCurrentPosition();
+        if(indexSlide === this.sliderItems.length){
+            this.sliderContainer.style.transitionDuration = '0s';
+            this.sliderContainer.style.transform = 'translate3d(-'+loopPosition+'px, 0px, 0px)';
+            setTimeout(function (){
                 thisObject.sliderContainer.style.transitionDuration = '0.4s';
-                thisObject.sliderContainer.style.transform = 'translate3d(-'+ currentPosition +'px, 0px, 0px)';
-                thisObject.setActiveSlide(indexSlide)
+                thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition*2+'px, 0px, 0px)';
+            },50)
+        }else if(indexSlide === -1){
+            this.sliderContainer.style.transitionDuration = '0s';
+            this.sliderContainer.style.transform = 'translate3d(-'+loopPosition*(this.sliderItems.length-2)+'px, 0px, 0px)';
+            setTimeout(function (){
+                thisObject.sliderContainer.style.transitionDuration = '0.4s';
+                thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition*(thisObject.sliderItems.length-3)+'px, 0px, 0px)';
+            },50)
+        }else{
+            this.sliderContainer.style.transitionDuration = '0.4s';
+            this.sliderContainer.style.transform = 'translate3d(-'+ currentPosition +'px, 0px, 0px)';
+        }
+    }
+    sliderNavigation(){
+        let indexSlide = (this.loop) ? 1 : 0;
+        let width = this.getSliderPosition();
+        let currentPosition = this.setCurrentPosition();
+        const thisObject = this;
+        this.next.onclick = function () {
+            if(indexSlide === thisObject.sliderItems.length){
+                indexSlide = 2;
+                currentPosition = thisObject.setCurrentPosition()*2;
             }
+            indexSlide++;
+            currentPosition += +width;
+            thisObject.setNextPosition(currentPosition,indexSlide);
         };
         this.prev.onclick = function () {
-            console.log()
             if(indexSlide === -1){
-                currentPosition -= +width;
-                thisObject.sliderContainer.style.transitionDuration = '0s';
-                thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition*(thisObject.sliderItems.length-2)+'px, 0px, 0px)';
-                setTimeout(function (){
-                    thisObject.sliderContainer.style.transitionDuration = '0.4s';
-                    thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition*(thisObject.sliderItems.length-3)+'px, 0px, 0px)';
-                },50)
                 indexSlide = thisObject.sliderItems.length-3;
-                currentPosition = loopPosition*(thisObject.sliderItems.length-3);
-            }else {
-                indexSlide--;
-                currentPosition -= +width;
-                thisObject.sliderContainer.style.transitionDuration = '0.4s';
-                thisObject.sliderContainer.style.transform = 'translate3d(-' + currentPosition + 'px, 0px, 0px)';
+                currentPosition = thisObject.setCurrentPosition()*(thisObject.sliderItems.length-3);
             }
+            indexSlide--;
+            currentPosition -= +width;
+            thisObject.setNextPosition(currentPosition,indexSlide);
         }
     }
 
