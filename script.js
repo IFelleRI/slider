@@ -142,7 +142,7 @@ class Slider{
             currentSlide.previousElementSibling.classList.add('prev-slide');
         }
     }
-    setCurrentPosition(){
+    setStartPosition(){
         let currentPosition = (this.loop) ? this.getSliderPosition() : 0;
         this.sliderContainer.style.transform = 'translate3d(-'+currentPosition+'px, 0px, 0px)';
         return currentPosition;
@@ -172,12 +172,12 @@ class Slider{
     sliderNavigation(){
         let indexSlide = (this.loop) ? 1 : 0;
         let width = this.getSliderPosition();
-        let currentPosition = this.setCurrentPosition();
+        let currentPosition = this.setStartPosition();
         const thisObject = this;
         this.next.onclick = function () {
             if(indexSlide === thisObject.sliderItems.length){
                 indexSlide = 2;
-                currentPosition = thisObject.setCurrentPosition()*2;
+                currentPosition = thisObject.setStartPosition()*2;
             }
             indexSlide++;
             currentPosition += +width;
@@ -186,7 +186,7 @@ class Slider{
         this.prev.onclick = function () {
             if(indexSlide === -1){
                 indexSlide = thisObject.sliderItems.length-3;
-                currentPosition = thisObject.setCurrentPosition()*(thisObject.sliderItems.length-3);
+                currentPosition = thisObject.setStartPosition()*(thisObject.sliderItems.length-3);
             }
             indexSlide--;
             currentPosition -= +width;
