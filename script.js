@@ -149,8 +149,8 @@ class Slider{
     }
     setNextPosition(currentPosition,indexSlide){
         const thisObject = this;
-        let loopPosition = this.setCurrentPosition();
-        if(indexSlide === this.sliderItems.length){
+        let loopPosition = this.setStartPosition();
+        if(this.loop && indexSlide === this.sliderItems.length){
             this.sliderContainer.style.transitionDuration = '0s';
             this.sliderContainer.style.transform = 'translate3d(-'+loopPosition+'px, 0px, 0px)';
             setTimeout(function (){
@@ -175,7 +175,7 @@ class Slider{
         let currentPosition = this.setStartPosition();
         const thisObject = this;
         this.next.onclick = function () {
-            if(indexSlide === thisObject.sliderItems.length){
+            if(thisObject.loop && indexSlide === thisObject.sliderItems.length){
                 indexSlide = 2;
                 currentPosition = thisObject.setStartPosition()*2;
             }
@@ -188,9 +188,11 @@ class Slider{
                 indexSlide = thisObject.sliderItems.length-3;
                 currentPosition = thisObject.setStartPosition()*(thisObject.sliderItems.length-3);
             }
-            indexSlide--;
-            currentPosition -= +width;
-            thisObject.setNextPosition(currentPosition,indexSlide);
+            if(thisObject.loop || indexSlide > 0){
+                indexSlide--;
+                currentPosition -= +width;
+                thisObject.setNextPosition(currentPosition,indexSlide);
+            }
         }
     }
 
@@ -289,9 +291,7 @@ class Slider{
         this.sliderContainer.classList.add('slider-init');
         this.setSettingsValue();
         this.setBreakPoints();
-        if(this.loop){
-            this.loopInit();
-        }
+        if (this.loop) this.loopInit();
         this.sliderItemsInit();
         this.setActiveSlide();
         this.setSwipeSlides();
@@ -301,7 +301,7 @@ class Slider{
 let slider = new Slider('main-slider-first',{
     slide:1,
     margin:20,
-    loop:true,
+    loop:false,
     touch:true,
     offset:'all',
     navigation:{
