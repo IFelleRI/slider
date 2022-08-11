@@ -61,19 +61,6 @@ class Slider{
             }
         }
     }
-    loopInit(index = 0){
-        let firstCloneElement = document.createElement('div');
-        firstCloneElement.classList.add('slider-slide');
-        firstCloneElement.innerHTML = this.sliderItems[this.sliderItems.length-1].innerHTML;
-        this.sliderItems.unshift(firstCloneElement);
-        this.sliderContainer.prepend(firstCloneElement);
-
-        let lastCloneElement = document.createElement('div');
-        lastCloneElement.classList.add('slider-slide');
-        lastCloneElement.innerHTML = this.sliderItems[1].innerHTML;
-        this.sliderItems.push(lastCloneElement);
-        this.sliderContainer.append(lastCloneElement);
-    }
     getSliderItemWidth(){
         if(this.viewCountSlide > 1){
             if(this.marginSlider && this.marginSlider > 0){
@@ -142,12 +129,34 @@ class Slider{
             currentSlide.previousElementSibling.classList.add('prev-slide');
         }
     }
+    loopInit(){
+        const sliderItemsArray = [...this.sliderContainer.children];
+
+        for (let i = this.viewCountSlide; i > 0; i--){
+            let firstCloneElement = document.createElement('div');
+            firstCloneElement.classList.add('slider-slide');
+            firstCloneElement.innerHTML = sliderItemsArray[i-1].innerHTML;
+            this.sliderItems.unshift(firstCloneElement);
+            this.sliderContainer.prepend(firstCloneElement);
+        }
+
+        for (let i = 1; i <= this.viewCountSlide; i++){
+            let lastCloneElement = document.createElement('div');
+            lastCloneElement.classList.add('slider-slide');
+            lastCloneElement.innerHTML = sliderItemsArray[i-1].innerHTML;
+            this.sliderItems.push(lastCloneElement);
+            this.sliderContainer.append(lastCloneElement);
+        }
+
+
+    }
     setStartPosition(){
-        let currentPosition = (this.loop) ? this.getSliderPosition() : 0;
+        let currentPosition = (this.loop) ? this.sliderContainer.offsetWidth+this.marginSlider : 0;
         this.sliderContainer.style.transform = 'translate3d(-'+currentPosition+'px, 0px, 0px)';
         return currentPosition;
     }
     setNextPosition(currentPosition,indexSlide){
+        console.log(indexSlide)
         const thisObject = this;
         let loopPosition = this.setStartPosition();
         if(this.loop && indexSlide === this.sliderItems.length){
@@ -301,7 +310,7 @@ class Slider{
 let slider = new Slider('main-slider-first',{
     slide:1,
     margin:20,
-    loop:false,
+    loop:true,
     touch:true,
     offset:'all',
     navigation:{
