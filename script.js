@@ -131,77 +131,76 @@ class Slider{
     }
     loopInit(){
         const sliderItemsArray = [...this.sliderContainer.children];
-
-        for (let i = this.viewCountSlide; i > 0; i--){
+        this.addSliderCount = 0;
+        console.log(sliderItemsArray)
+        for (let i = sliderItemsArray.length-1; i > (sliderItemsArray.length - this.viewCountSlide); i--){
             let firstCloneElement = document.createElement('div');
             firstCloneElement.classList.add('slider-slide');
-            firstCloneElement.innerHTML = sliderItemsArray[i-1].innerHTML;
+            firstCloneElement.innerHTML = sliderItemsArray[i].innerHTML;
             this.sliderItems.unshift(firstCloneElement);
             this.sliderContainer.prepend(firstCloneElement);
+            this.addSliderCount++;
         }
 
-        for (let i = 1; i <= this.viewCountSlide; i++){
+        for (let i = 0; i < this.viewCountSlide-1; i++){
             let lastCloneElement = document.createElement('div');
             lastCloneElement.classList.add('slider-slide');
-            lastCloneElement.innerHTML = sliderItemsArray[i-1].innerHTML;
+            lastCloneElement.innerHTML = sliderItemsArray[i].innerHTML;
             this.sliderItems.push(lastCloneElement);
             this.sliderContainer.append(lastCloneElement);
+            this.addSliderCount++;
         }
-
-
     }
     setStartPosition(){
-        let currentPosition = (this.loop) ? this.sliderContainer.offsetWidth+this.marginSlider : 0;
+        let currentPosition = (this.loop) ? (this.sliderContainer.offsetWidth)-(this.getSliderItemWidth()) : 0;
         this.sliderContainer.style.transform = 'translate3d(-'+currentPosition+'px, 0px, 0px)';
         return currentPosition;
     }
-    setNextPosition(currentPosition,indexSlide){
-        console.log(indexSlide)
+    setNextPosition(currentPosition,indexSlide,direction = ''){
         const thisObject = this;
         let loopPosition = this.setStartPosition();
-        if(this.loop && indexSlide === this.sliderItems.length){
+        if(direction === 'next'){
+            this.indexSlide++;
+            this.currentPosition += this.width;
+        }
+        if(direction === 'prev'){
+            this.indexSlide--;
+            this.currentPosition -= this.width;
+        }
+        if(this.loop && this.indexSlide === (this.sliderItems.length - this.addSliderCount)){
             this.sliderContainer.style.transitionDuration = '0s';
-            this.sliderContainer.style.transform = 'translate3d(-'+loopPosition+'px, 0px, 0px)';
+            this.sliderContainer.style.transform = 'translate3d(-'+(loopPosition-this.width)+'px, 0px, 0px)';
             setTimeout(function (){
                 thisObject.sliderContainer.style.transitionDuration = '0.4s';
-                thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition*2+'px, 0px, 0px)';
+                thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition+'px, 0px, 0px)';
+                thisObject.indexSlide = 0;
+                thisObject.currentPosition = thisObject.setStartPosition();
             },50)
-        }else if(indexSlide === -1){
+        }else if(this.indexSlide === -2){
             this.sliderContainer.style.transitionDuration = '0s';
             this.sliderContainer.style.transform = 'translate3d(-'+loopPosition*(this.sliderItems.length-2)+'px, 0px, 0px)';
             setTimeout(function (){
                 thisObject.sliderContainer.style.transitionDuration = '0.4s';
                 thisObject.sliderContainer.style.transform = 'translate3d(-'+loopPosition*(thisObject.sliderItems.length-3)+'px, 0px, 0px)';
-            },50)
+                thisObject.indexSlide = 1;
+                thisObject.currentPosition = loopPosition*2;
+            },50);
         }else{
             this.sliderContainer.style.transitionDuration = '0.4s';
-            this.sliderContainer.style.transform = 'translate3d(-'+ currentPosition +'px, 0px, 0px)';
+            this.sliderContainer.style.transform = 'translate3d(-'+ this.currentPosition +'px, 0px, 0px)';
         }
     }
     sliderNavigation(){
-        let indexSlide = (this.loop) ? 1 : 0;
-        let width = this.getSliderPosition();
-        let currentPosition = this.setStartPosition();
+        this.indexSlide = 0;
+        this.currentPosition = this.setStartPosition();
+        this.width = this.getSliderPosition();
         const thisObject = this;
         this.next.onclick = function () {
-            if(thisObject.loop && indexSlide === thisObject.sliderItems.length){
-                indexSlide = 2;
-                currentPosition = thisObject.setStartPosition()*2;
-            }
-            indexSlide++;
-            currentPosition += +width;
-            thisObject.setNextPosition(currentPosition,indexSlide);
+            thisObject.setNextPosition(thisObject.currentPosition,thisObject.indexSlide,'next');
         };
+
         this.prev.onclick = function () {
-            if(indexSlide === -1){
-                indexSlide = thisObject.sliderItems.length-3;
-                currentPosition = thisObject.setStartPosition()*(thisObject.sliderItems.length-3);
-            }
-            if(thisObject.loop || indexSlide > 0){
-                indexSlide--;
-                currentPosition -= +width;
-                thisObject.setNextPosition(currentPosition,indexSlide);
-            }
+            thisObject.setNextPosition(thisObject.currentPosition,thisObject.indexSlide,'prev');
         }
     }
 
@@ -232,7 +231,7 @@ class Slider{
         }
 
         this.sliderContainer.onmousemove = function(e) { swipeSlides(e); };
-        
+
         function swipeSlides(e){
             if (!pressed) {
                 return;
@@ -286,15 +285,15 @@ class Slider{
                             thisObject.sliderContainer.style.transform = 'translate3d(-'+ currentPosition +'px, 0px, 0px)';
                             thisObject.setActiveSlide(indexSlide)
                         }
-                        pressed = false; 
+                        pressed = false;
                     }
                 } else {
-                    // координаты для Y //   
+                    // координаты для Y //
                 }
             }
         };
     }
-    // Swipe slides end //  
+    // Swipe slides end //
 
     SliderInit(){
         this.sliderContainer.classList.add('slider-init');
@@ -308,11 +307,11 @@ class Slider{
     }
 }
 let slider = new Slider('main-slider-first',{
-    slide:1,
+    slide:3,
     margin:20,
     loop:true,
     touch:true,
-    offset:'all',
+    offset:'one',
     navigation:{
         'next':'slider-btn-next',
         'prev':'slider-btn-prev'
